@@ -16,7 +16,16 @@ st.markdown("---")
 
 @st.cache_resource
 def cargar_modelo():
-    modelo = tf.keras.models.load_model("modelo_parkinson.h5", compile=False)
+    from tensorflow.keras.models import load_model
+    import tensorflow as tf
+    import keras
+
+    # 🔹 Activar compatibilidad con modelos antiguos
+    tf.keras.utils.get_custom_objects().clear()
+
+    # 🔹 Cargar el modelo con el modo "legacy"
+    modelo = load_model("modelo_parkinson.h5", compile=False, safe_mode=False)
+
     return modelo
 
 modelo = cargar_modelo()
@@ -44,3 +53,4 @@ if imagen_subida:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
         st.markdown("---")
         st.markdown("**Nota:** Este resultado es orientativo y no sustituye una evaluación médica profesional.", unsafe_allow_html=True)
+
