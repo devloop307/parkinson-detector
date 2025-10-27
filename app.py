@@ -2,10 +2,9 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-from keras.models import load_model
-from keras.layers import InputLayer
+from keras.models import model_from_json
+import h5py
 
-# Configuración de la página
 st.set_page_config(
     page_title="Detector de Parkinson",
     page_icon="🧠",
@@ -13,21 +12,23 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Título y descripción
 st.markdown("<h1 style='text-align: center; color: #4B8BBE;'>🧠 Detección de Parkinson</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'>Sube una imagen de trazo (espiral u onda) para predecir la probabilidad de Parkinson.</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Cargar modelo (compatibilidad amplia)
 @st.cache_resource
 def cargar_modelo():
-    tf.keras.utils.get_custom_objects()["InputLayer"] = InputLayer
-    modelo = load_model("modelo_parkinson.h5", compile=False)
-    return modelo
+    # Leer manualmente el .h5 para ignorar batch_shape y otros argumentos nuevos
+    with h5py.File("modelo_parkinson.h5", "r") as f:
+        config_json = f["model_config"][()]
+        if isinstance(config_json, bytes):
+            config_json = config_json.decode("utf-8")
+        model = model_from_json(config_json)
+        model.load_weights(f["model_weights"][()])
+    return model
 
 modelo = cargar_modelo()
 
-# Función para predecir imagen
 def predecir_imagen(imagen):
     img = imagen.convert("RGB").resize((224, 224))
     img_array = tf.keras.preprocessing.image.img_to_array(img)
@@ -36,7 +37,6 @@ def predecir_imagen(imagen):
     pred = modelo.predict(img_array)[0][0]
     return pred
 
-# Subir imagen
 imagen_subida = st.file_uploader("📤 Sube una imagen (formatos: JPG, JPEG o PNG)", type=["jpg", "jpeg", "png"])
 
 if imagen_subida:
