@@ -16,15 +16,15 @@ st.markdown("---")
 
 @st.cache_resource
 def cargar_modelo():
-    from tensorflow.keras.models import load_model
     import tensorflow as tf
-    import keras
+    import h5py
+    from keras.src.saving.legacy import hdf5_format
 
-    # 🔹 Activar compatibilidad con modelos antiguos
-    tf.keras.utils.get_custom_objects().clear()
+    model_path = "modelo_parkinson.h5"
 
-    # 🔹 Cargar el modelo con el modo "legacy"
-    modelo = load_model("modelo_parkinson.h5", compile=False, safe_mode=False)
+    # Abrir el archivo .h5 manualmente en modo legacy
+    with h5py.File(model_path, "r") as f:
+        modelo = hdf5_format.load_model_from_hdf5(f)
 
     return modelo
 
@@ -53,4 +53,5 @@ if imagen_subida:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
         st.markdown("---")
         st.markdown("**Nota:** Este resultado es orientativo y no sustituye una evaluación médica profesional.", unsafe_allow_html=True)
+
 
