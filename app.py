@@ -15,18 +15,19 @@ st.markdown("<p style='text-align: center;'>Sube una imagen de trazo (espiral u 
 st.markdown("---")
 
 @st.cache_resource
+@st.cache_resource
 def cargar_modelo():
-    import tensorflow as tf
     import h5py
-    from keras.src.saving.legacy import hdf5_format
+    import tensorflow as tf
+    from keras.saving.legacy import hdf5_format
 
     model_path = "modelo_parkinson.h5"
 
-    # Abrir el archivo .h5 manualmente en modo legacy
+    # Abrir manualmente el archivo HDF5 y cargar con el loader legacy
     with h5py.File(model_path, "r") as f:
-        modelo = hdf5_format.load_model_from_hdf5(f)
+        model = hdf5_format.load_model_from_hdf5(f)
 
-    return modelo
+    return model
 
 modelo = cargar_modelo()
 
@@ -53,5 +54,6 @@ if imagen_subida:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
         st.markdown("---")
         st.markdown("**Nota:** Este resultado es orientativo y no sustituye una evaluación médica profesional.", unsafe_allow_html=True)
+
 
 
