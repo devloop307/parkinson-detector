@@ -16,16 +16,22 @@ st.set_page_config(
 # ================================
 # 🎨 ENCABEZADO Y DESCRIPCIÓN
 # ================================
-st.markdown("<h1 style='text-align: center; color: #4B8BBE;'>🧠 Detección de Parkinson</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Sube una imagen de trazo (espiral u onda) para predecir la probabilidad de Parkinson.</p>", unsafe_allow_html=True)
+st.markdown(
+    "<h1 style='text-align: center; color: #4B8BBE;'>🧠 Detección de Parkinson</h1>",
+    unsafe_allow_html=True
+)
+st.markdown(
+    "<p style='text-align: center;'>Sube una imagen de trazo (espiral u onda) para predecir la probabilidad de Parkinson.</p>",
+    unsafe_allow_html=True
+)
 st.markdown("---")
 
 # ================================
-# ⚙️ CARGA DEL MODELO
+# ⚙️ CARGA DEL MODELO LEGACY
 # ================================
 @st.cache_resource
 def cargar_modelo():
-    # Cargar el modelo ya convertido a formato legacy
+    # Carga el modelo legacy ya convertido
     modelo = tf.keras.models.load_model("modelo_parkinson_legacy.h5", compile=False)
     return modelo
 
@@ -45,7 +51,10 @@ def predecir_imagen(imagen):
 # ================================
 # 📤 SUBIR IMAGEN Y PREDICCIÓN
 # ================================
-imagen_subida = st.file_uploader("Sube una imagen (trazo de espiral u onda)", type=["jpg", "jpeg", "png"])
+imagen_subida = st.file_uploader(
+    "📤 Sube una imagen (formatos: JPG, JPEG o PNG)",
+    type=["jpg", "jpeg", "png"]
+)
 
 if imagen_subida:
     imagen = Image.open(imagen_subida)
@@ -61,4 +70,7 @@ if imagen_subida:
         else:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
 
-        st.markdown("<p style='text-align:center; font-size:14px; color:gray;'>⚠️ Este resultado es orientativo y no sustituye una evaluación médica profesional.</p>", unsafe_allow_html=True)
+        st.markdown(
+            "<p style='text-align:center; font-size:14px; color:gray;'>⚠️ Este resultado es orientativo y no sustituye una evaluación médica profesional.</p>",
+            unsafe_allow_html=True
+        )
