@@ -2,8 +2,6 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-import h5py
-from keras.saving.legacy import hdf5_format
 
 # ================================
 # 🧠 Configuración de la página
@@ -21,14 +19,13 @@ st.markdown("<p style='text-align: center;'>Sube una imagen de trazo (espiral u 
 st.markdown("---")
 
 # ================================
-# ⚙️ Cargar modelo (.h5 legacy)
+# ⚙️ Cargar modelo (.h5 compatible con TF 2.15)
 # ================================
 @st.cache_resource(show_spinner="Cargando modelo, por favor espera...")
 def cargar_modelo():
     model_path = "modelo_parkinson.h5"
     try:
-        with h5py.File(model_path, "r") as f:
-            model = hdf5_format.load_model_from_hdf5(f)
+        model = tf.keras.models.load_model(model_path, compile=False)
         return model
     except Exception as e:
         st.error(f"❌ Error al cargar el modelo: {e}")
@@ -37,7 +34,7 @@ def cargar_modelo():
 modelo = cargar_modelo()
 
 # ================================
-# 🧩 Función de predicción
+# 🧩 Predicción
 # ================================
 def predecir_imagen(imagen):
     img = imagen.convert("RGB").resize((224, 224))
@@ -47,7 +44,7 @@ def predecir_imagen(imagen):
     return pred
 
 # ================================
-# 🖼️ Interfaz de usuario
+# 🖼️ Interfaz
 # ================================
 imagen_subida = st.file_uploader("Sube una imagen (trazo de espiral u onda)", type=["jpg", "jpeg", "png"])
 
@@ -64,4 +61,3 @@ if imagen_subida:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
         st.markdown("---")
         st.markdown("**Nota:** Este resultado es orientativo y no sustituye una evaluación médica profesional.", unsafe_allow_html=True)
-
