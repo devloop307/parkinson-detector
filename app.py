@@ -21,16 +21,33 @@ st.markdown("---")
 # ⚙️ Cargar modelo (.h5 compatible con TF 2.15)
 # ================================
 @st.cache_resource(show_spinner="Cargando modelo, por favor espera...")
+@st.cache_resource(show_spinner="🧠 Cargando modelo, por favor espera...")
 def cargar_modelo():
+    import tensorflow as tf
+    import h5py
+
     model_path = "modelo_parkinson.h5"
     try:
-        model = tf.keras.models.load_model(model_path, compile=False)
+        # 💡 Cargar en modo 'custom_objects' para compatibilidad con modelos antiguos
+        with h5py.File(model_path, "r") as f:
+            model = tf.keras.models.load_model(f, compile=False)
         return model
     except Exception as e:
-        st.error(f"❌ Error al cargar el modelo: {e}")
-        st.stop()
-
-modelo = cargar_modelo()
+        st.error(f"❌ Error al cargar el modelo (modo directo): {e}")
+        st.info("🔁 Intentando carga alternativa...")
+        try:
+            from tensorflow.keras.models import model_from_json
+            import json
+            with h5py.File(model_path, "r") as f:
+                config = f.attrs.get("model_config")
+                if config:
+                    config_json = config.decode("utf-8")
+                    model = model_from_json(config_json)
+                    model.load_weights(model_path)
+                    return model
+        except Exception as e2:
+            st.error(f"❌ No se pudo cargar el modelo: {e2}")
+            st.stop()
 
 # ================================
 # 🧩 Predicción
@@ -60,5 +77,6 @@ if imagen_subida:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
         st.markdown("---")
         st.markdown("**Nota:** Este resultado es orientativo y no sustituye una evaluación médica profesional.", unsafe_allow_html=True)
+
 
 
