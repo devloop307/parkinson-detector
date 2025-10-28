@@ -3,9 +3,7 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 
-# ================================
-# 🧠 CONFIGURACIÓN DE LA PÁGINA
-# ================================
+# Configuración de la página
 st.set_page_config(
     page_title="Detector de Parkinson",
     page_icon="🧠",
@@ -13,33 +11,20 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ================================
-# 🎨 ENCABEZADO Y DESCRIPCIÓN
-# ================================
-st.markdown(
-    "<h1 style='text-align: center; color: #4B8BBE;'>🧠 Detección de Parkinson</h1>",
-    unsafe_allow_html=True
-)
-st.markdown(
-    "<p style='text-align: center;'>Sube una imagen de trazo (espiral u onda) para predecir la probabilidad de Parkinson.</p>",
-    unsafe_allow_html=True
-)
+# Título
+st.markdown("<h1 style='text-align: center; color: #4B8BBE;'>🧠 Detección de Parkinson</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Sube una imagen de trazo para predecir la probabilidad de Parkinson.</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# ================================
-# ⚙️ CARGA DEL MODELO LEGACY
-# ================================
+# Cargar modelo
 @st.cache_resource
 def cargar_modelo():
-    # Carga el modelo legacy ya convertido
-    modelo = tf.keras.models.load_model("modelo_parkinson_legacy.h5", compile=False)
+    modelo = tf.keras.models.load_model("modelo_parkinson.h5")
     return modelo
 
 modelo = cargar_modelo()
 
-# ================================
-# 🔍 FUNCIÓN DE PREDICCIÓN
-# ================================
+# Función para predicción
 def predecir_imagen(imagen):
     img = imagen.convert("RGB").resize((224, 224))
     img_array = tf.keras.preprocessing.image.img_to_array(img)
@@ -48,29 +33,19 @@ def predecir_imagen(imagen):
     pred = modelo.predict(img_array)[0][0]
     return pred
 
-# ================================
-# 📤 SUBIR IMAGEN Y PREDICCIÓN
-# ================================
-imagen_subida = st.file_uploader(
-    "📤 Sube una imagen (formatos: JPG, JPEG o PNG)",
-    type=["jpg", "jpeg", "png"]
-)
+# Subir imagen
+imagen_subida = st.file_uploader("Sube una imagen (trazo de espiral u onda)", type=["jpg", "jpeg", "png"])
 
 if imagen_subida:
     imagen = Image.open(imagen_subida)
-    st.image(imagen, caption='🖼️ Imagen cargada', use_column_width=True)
+    st.image(imagen, caption='Imagen cargada', use_column_width=True)
 
     if st.button("🔍 Predecir"):
-        with st.spinner("🧠 Analizando imagen..."):
-            probabilidad = predecir_imagen(imagen)
-
-        st.markdown("---")
+        probabilidad = predecir_imagen(imagen)
         if probabilidad > 0.5:
             st.error(f"🧠 Probabilidad de Parkinson detectada: {probabilidad*100:.2f}%")
         else:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
-
-        st.markdown(
-            "<p style='text-align:center; font-size:14px; color:gray;'>⚠️ Este resultado es orientativo y no sustituye una evaluación médica profesional.</p>",
-            unsafe_allow_html=True
-        )
+            
+        st.markdown("---")
+        st.markdown("**Nota:** Este resultado es orientativo y no sustituye una evaluación médica profesional.", unsafe_allow_html=True)
