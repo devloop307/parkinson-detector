@@ -2,7 +2,7 @@ services:
   - type: web
     name: parkinson-detector
     env: python
-    pythonVersion: 3.10.13
     plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "streamlit run app.py --server.port $PORT --server.enableCORS false --server.enableXsrfProtection false"
+    pythonVersion: 3.10.13
