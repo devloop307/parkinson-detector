@@ -24,17 +24,19 @@ st.markdown("---")
 # ⚙️ Cargar modelo (.h5 legacy)
 # ================================
 @st.cache_resource(show_spinner="Cargando modelo, por favor espera...")
+@st.cache_resource(show_spinner="Cargando modelo, por favor espera...")
 def cargar_modelo():
+    import tensorflow as tf
+
     model_path = "modelo_parkinson.h5"
+
     try:
-        with h5py.File(model_path, "r") as f:
-            model = hdf5_format.load_model_from_hdf5(f)
+        # ⚙️ Cargar el modelo sin compilar, ignorando configuraciones antiguas
+        model = tf.keras.models.load_model(model_path, compile=False)
         return model
     except Exception as e:
         st.error(f"❌ Error al cargar el modelo: {e}")
         st.stop()
-
-modelo = cargar_modelo()
 
 # ================================
 # 🧩 Función de predicción
@@ -64,3 +66,4 @@ if imagen_subida:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
         st.markdown("---")
         st.markdown("**Nota:** Este resultado es orientativo y no sustituye una evaluación médica profesional.", unsafe_allow_html=True)
+
