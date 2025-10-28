@@ -1,4 +1,4 @@
-fimport streamlit as st
+import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
@@ -60,4 +60,5 @@ if imagen_subida:
             st.success(f"✅ Imagen saludable detectada: {(1 - probabilidad)*100:.2f}%")
         st.markdown("---")
         st.markdown("**Nota:** Este resultado es orientativo y no sustituye una evaluación médica profesional.", unsafe_allow_html=True)
+
 
